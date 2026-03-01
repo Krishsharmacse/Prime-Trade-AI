@@ -1,0 +1,149 @@
+Historical Trader Data (historical_data.csv)
+Columns you care about:
+
+Account → trader ID
+
+Coin → asset traded
+
+Execution Price → trade price
+
+Size Tokens → amount traded
+
+Closed PnL → profit/loss per trade
+
+Timestamp IST → trade timestamp
+
+Other useful columns: Side, Direction, Fee, Size USD.
+
+Fear & Greed Index (fear_greed.csv)
+Columns:
+
+timestamp → UNIX timestamp of the index
+
+value → numeric sentiment score
+
+classification → text label (Fear, Greed, Extreme Fear, etc.)
+
+date → date for easier merge
+
+2️⃣ Clean & Prepare the Data
+
+Parse timestamps
+
+Historical trades: convert Timestamp IST → datetime → date column
+
+Fear & Greed: convert timestamp → datetime → date (or use provided date)
+
+Normalize column names
+
+Rename Account → account, Closed PnL → closedPnL, etc.
+
+Check missing or incorrect values
+
+closedPnL or Size Tokens should be numeric; convert if necessary.
+
+Drop or impute rows with missing critical info.
+
+3️⃣ Aggregate the data
+a) Daily per-account metrics
+
+Group by account + date
+
+Calculate:
+
+sum_pnl → total PnL per trader per day
+
+avg_pnl → average PnL per trade
+
+win_rate → fraction of profitable trades (closedPnL > 0)
+
+total_volume → sum of Size Tokens
+
+b) Daily global metrics
+
+Group by date
+
+Calculate:
+
+total_trades
+
+unique_traders
+
+avg_pnl across all trades
+
+win_rate across all trades
+
+total_volume
+
+4️⃣ Merge trader metrics with sentiment
+
+Use the date column in both datasets
+
+Example:
+
+merged = daily_trader_metrics.merge(fg[['date','classification','value']], on='date', how='inner')
+
+
+Now each row has daily trader metrics + Fear/Greed sentiment.
+
+5️⃣ Exploratory Data Analysis (EDA)
+
+Visualizations to start with:
+
+PnL vs Sentiment
+
+Boxplot of avg_pnl by classification (Fear, Greed, etc.)
+
+Look for patterns: do traders make more or less PnL in Fear/Greed regimes?
+
+Win rate vs Sentiment
+
+Bar chart of win_rate by sentiment
+
+Volume vs Sentiment
+
+Do traders trade more during Greed?
+
+Time series plots
+
+Daily avg_pnl over time overlaid with Fear/Greed value
+
+6️⃣ Statistical Analysis
+
+ANOVA → Does avg_pnl significantly differ across sentiment categories?
+
+Pairwise t-tests → Compare Fear vs Greed, Extreme Fear vs Extreme Greed.
+
+Correlation → numeric Fear/Greed value vs avg_pnl, win_rate, total_volume.
+
+7️⃣ Optional Predictive Modeling
+
+Objective: Can sentiment + other metrics predict daily trader performance?
+
+Features: total_trades, unique_traders, total_volume, numeric sentiment value
+
+Target: avg_pnl (regression) or win_rate
+
+Model: Random Forest / XGBoost
+
+Evaluate: R2, MSE, feature importance
+
+8️⃣ Per-account analysis
+
+Identify top performers vs bottom performers
+
+Look at patterns during Fear vs Greed
+
+Check whether some traders consistently profit regardless of sentiment
+
+9️⃣ Insights / Summary
+
+Write a few sentences:
+
+“Traders tend to make higher PnL during Greed days.”
+
+“Win rate drops in Extreme Fear days.”
+
+“Volume spikes in Greed, indicating more aggressive trading.”
+
+Include 1–2 plots and key statistics to support insights.
